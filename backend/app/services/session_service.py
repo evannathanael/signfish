@@ -105,10 +105,13 @@ class SessionService:
             completed=self._is_completed(session),
         )
 
-    def _active_prompts(self, session: Session, visible_prompt_count: int) -> list[SessionPrompt]:
+    def _active_prompts(self, session: Session, visible_prompt_count: int) -> list[dict[str, object]]:
         start = session.current_index
         end = start + visible_prompt_count
-        return session.prompts[start:end]
+        return [
+            {"id": prompt.id, "target": prompt.target}
+            for prompt in session.prompts[start:end]
+        ]
 
     @staticmethod
     def _is_completed(session: Session) -> bool:
