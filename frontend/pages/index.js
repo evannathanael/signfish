@@ -8,36 +8,6 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="panel">
-        <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Dashboard</p>
-            <h1 className="mt-3 text-3xl font-black">Sign Language Practice Hub</h1>
-            <p className="mt-4 text-slate-300">
-              Your workspace for sign recognition, typing speed, and interactive training. This dashboard
-              keeps the experience organized and gives space for a dedicated sign language implementation.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-slate-700 bg-slate-900/80 p-6">
-            <h2 className="text-xl font-semibold">Sign language space</h2>
-            <p className="mt-3 text-slate-300">
-              The section below is built to host your webcam inference and sign target flow. You can easily
-              place new sign detection components or instructions here.
-            </p>
-            <div className="mt-5 grid gap-3 text-sm text-slate-300">
-              <div className="rounded-2xl bg-slate-800/80 p-4">
-                <p className="font-semibold">Ready for integration</p>
-                <p className="mt-2">Camera feed and sign label components fit naturally into this panel.</p>
-              </div>
-              <div className="rounded-2xl bg-slate-800/80 p-4">
-                <p className="font-semibold">Practice flow</p>
-                <p className="mt-2">Show a sign in front of the webcam, confirm recognition, then continue to the next sign.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
           <div className="panel">

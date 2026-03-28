@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Webcam from './Webcam';
 import StatsPanel from './StatsPanel';
 import { useTimer } from '../hooks/useTimer';
@@ -16,15 +16,16 @@ function pickPrompt(difficulty) {
 }
 
 export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
-  const initialPrompt = pickPrompt(difficulty);
-  const [currentPrompt, setCurrentPrompt] = useState(initialPrompt);
-  const [letterStatuses, setLetterStatuses] = useState(initialPrompt.split('').map(() => 'pending'));
+  const fallbackPrompt =
+    PROMPTS_BY_DIFFICULTY[difficulty]?.[0] || PROMPTS_BY_DIFFICULTY[DEFAULT_DIFFICULTY][0];
+  const [currentPrompt, setCurrentPrompt] = useState(fallbackPrompt);
+  const [letterStatuses, setLetterStatuses] = useState(fallbackPrompt.split('').map(() => 'pending'));
   const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [attempted, setAttempted] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [recentOutcomes, setRecentOutcomes] = useState([]);
   const [status, setStatus] = useState('Click start to begin your 30-second sign race.');
-  const { timeLeft, isRunning, start, stop, reset } = useTimer(ROUND_TIME_SECONDS);
+  const { timeLeft, isRunning, start, reset } = useTimer(ROUND_TIME_SECONDS);
 
   const promptLetters = currentPrompt.split('');
   const windowStart = Math.max(0, Math.min(currentLetterIndex, promptLetters.length - 10));
@@ -110,6 +111,8 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
   }
 
   function handleStart() {
+    if (isRunning) return;
+
     const newPrompt = pickPrompt(difficulty);
     reset();
     setAttempted(0);
@@ -122,6 +125,14 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
     start(finishRound);
   }
 
+  useEffect(() => {
+    const newPrompt = pickPrompt(difficulty);
+    setCurrentPrompt(newPrompt);
+    setLetterStatuses(newPrompt.split('').map(() => 'pending'));
+    setCurrentLetterIndex(0);
+    setStatus(`Difficulty changed to ${difficulty}. New target loaded.`);
+  }, [difficulty]);
+
   return (
     <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
       <div className="space-y-4">
@@ -130,10 +141,11 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
             <h2 className="text-2xl font-bold">Sign Race</h2>
             <button
               type="button"
-              onClick={isRunning ? stop : handleStart}
-              className="rounded-md bg-mint px-4 py-2 text-sm font-semibold text-ink"
+              onClick={handleStart}
+              disabled={isRunning}
+              className={`rounded-md bg-mint px-4 py-2 text-sm font-semibold text-ink ${isRunning ? 'cursor-not-allowed opacity-50' : ''}`}
             >
-              {isRunning ? 'Pause' : 'Start 30s round'}
+              Start 30s round
             </button>
           </div>
           <p className="mb-2 text-sm text-slate-300">Difficulty: <span className="capitalize">{difficulty}</span></p>
