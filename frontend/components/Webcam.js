@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useWebcam } from '../hooks/useWebcam';
 
+const LIVE_CAPTURE_INTERVAL_MS = 900;
+
 export default function Webcam({ onFrameCapture, disabled }) {
   const { videoRef, captureFrame, error, isReady } = useWebcam();
 
@@ -13,6 +15,16 @@ export default function Webcam({ onFrameCapture, disabled }) {
 
     return () => clearInterval(intervalId);
   }, [captureFrame, disabled, isReady, onFrameCapture]);
+
+  useEffect(() => {
+    if (disabled || !onFrameCapture) return undefined;
+
+    const intervalId = setInterval(() => {
+      onFrameCapture(captureFrame());
+    }, LIVE_CAPTURE_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [captureFrame, disabled, onFrameCapture]);
 
   return (
     <div className="panel space-y-3">
