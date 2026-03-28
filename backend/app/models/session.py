@@ -2,13 +2,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 
-@dataclass(slots=True)
+@dataclass
 class SessionPrompt:
     id: int
     target: str
 
 
-@dataclass(slots=True)
+@dataclass
 class SessionAnswer:
     prompt_id: int
     input_char: str
@@ -16,7 +16,7 @@ class SessionAnswer:
     is_correct: bool
 
 
-@dataclass(slots=True)
+@dataclass
 class Session:
     id: str
     prompts: list[SessionPrompt]
