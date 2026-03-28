@@ -16,16 +16,6 @@ export default function Webcam({ onFrameCapture, disabled }) {
     return () => clearInterval(intervalId);
   }, [captureFrame, disabled, isReady, onFrameCapture]);
 
-  useEffect(() => {
-    if (disabled || !onFrameCapture) return undefined;
-
-    const intervalId = setInterval(() => {
-      onFrameCapture(captureFrame());
-    }, LIVE_CAPTURE_INTERVAL_MS);
-
-    return () => clearInterval(intervalId);
-  }, [captureFrame, disabled, onFrameCapture]);
-
   return (
     <div className="panel space-y-3">
       <h3 className="text-lg font-semibold">Webcam Input</h3>
