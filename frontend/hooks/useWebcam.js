@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useWebcam() {
   const videoRef = useRef(null);
@@ -28,9 +28,10 @@ export function useWebcam() {
     };
   }, []);
 
-  function captureFrame() {
+  const captureFrame = useCallback(() => {
     const video = videoRef.current;
     if (!video) return null;
+    if (!video.videoWidth || !video.videoHeight) return null;
 
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth || 640;
@@ -38,7 +39,7 @@ export function useWebcam() {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg', 0.8);
-  }
+  }, []);
 
   return { videoRef, captureFrame, error };
 }

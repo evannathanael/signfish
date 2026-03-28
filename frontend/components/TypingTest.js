@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Webcam from './Webcam';
 import StatsPanel from './StatsPanel';
 import { useTimer } from '../hooks/useTimer';
@@ -26,6 +26,7 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
   const [recentOutcomes, setRecentOutcomes] = useState([]);
   const [status, setStatus] = useState('Click start to begin your 30-second sign race.');
   const { timeLeft, isRunning, start, reset } = useTimer(ROUND_TIME_SECONDS);
+  const isInferencingRef = useRef(false);
 
   const promptLetters = currentPrompt.split('');
   const windowStart = Math.max(0, Math.min(currentLetterIndex, promptLetters.length - 10));
@@ -48,8 +49,11 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
     }
   }
 
-  async function handleFrameCapture(frameBase64) {
+  const handleFrameCapture = useCallback(async (frameBase64) => {
     if (!isRunning || !frameBase64) return;
+    if (isInferencingRef.current) return;
+
+    isInferencingRef.current = true;
 
     setAttempted((prev) => prev + 1);
 
@@ -107,8 +111,10 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
         setCurrentLetterIndex(nextLetter);
         setStatus(offlineCorrect ? 'Offline correct. Move to next letter.' : 'Offline wrong. Try the next letter.');
       }
+    } finally {
+      isInferencingRef.current = false;
     }
-  }
+  }, [currentLetterIndex, currentPrompt, difficulty, isRunning, promptLetters.length]);
 
   function handleStart() {
     if (isRunning) return;
