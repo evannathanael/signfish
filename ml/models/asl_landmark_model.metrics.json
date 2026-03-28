@@ -1,0 +1,171 @@
+{
+  "best_epoch": 2,
+  "dataset_root": "/Users/eron/.cache/kagglehub/datasets/ayuraj/asl-dataset/versions/1/asl_dataset/asl_dataset",
+  "validation_loss": 2.6242239475250244,
+  "validation_accuracy": 0.55,
+  "validation_macro_f1": 0.43669467787114846,
+  "class_names": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "F",
+    "G",
+    "H",
+    "I",
+    "K",
+    "L",
+    "O",
+    "P",
+    "R",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y"
+  ],
+  "samples_per_class": {
+    "A": 2,
+    "B": 20,
+    "C": 20,
+    "D": 20,
+    "F": 20,
+    "G": 10,
+    "H": 6,
+    "I": 16,
+    "K": 20,
+    "L": 18,
+    "O": 2,
+    "P": 10,
+    "R": 20,
+    "U": 20,
+    "V": 18,
+    "W": 10,
+    "X": 20,
+    "Y": 10
+  },
+  "skipped_files_count": 109,
+  "classification_report": {
+    "A": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "B": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 3.0
+    },
+    "C": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1-score": 0.8571428571428571,
+      "support": 3.0
+    },
+    "D": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "F": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 3.0
+    },
+    "G": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "H": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "I": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 2.0
+    },
+    "K": {
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.4,
+      "support": 3.0
+    },
+    "L": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1-score": 0.75,
+      "support": 3.0
+    },
+    "O": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "P": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 2.0
+    },
+    "R": {
+      "precision": 0.25,
+      "recall": 1.0,
+      "f1-score": 0.4,
+      "support": 3.0
+    },
+    "U": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "V": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "W": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 1.0
+    },
+    "X": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1-score": 0.75,
+      "support": 3.0
+    },
+    "Y": {
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1-score": 0.6666666666666666,
+      "support": 2.0
+    },
+    "accuracy": 0.55,
+    "macro avg": {
+      "precision": 0.42777777777777776,
+      "recall": 0.45370370370370366,
+      "f1-score": 0.4124338624338625,
+      "support": 40.0
+    },
+    "weighted avg": {
+      "precision": 0.5025000000000001,
+      "recall": 0.55,
+      "f1-score": 0.4901190476190476,
+      "support": 40.0
+    }
+  }
+}

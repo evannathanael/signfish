@@ -1,6 +1,16 @@
 from fastapi import FastAPI
 
+from .routes.predict import router as predict_router
 from app.routes.api import router as api_router
+
+
+
+app.include_router(predict_router, prefix="/api")
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 app = FastAPI(
     title="Signfish Backend",

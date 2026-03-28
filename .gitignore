@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.runtime/
+ml/data/external/
+ml/data/raw/
+ml/data/processed/
+backend/.runtime/
