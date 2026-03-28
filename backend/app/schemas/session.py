@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class SessionStartRequest(BaseModel):
-    prompt_count: int = Field(default=15, ge=1, le=200)
+    prompt_count: int = Field(default=50, ge=10, le=500)
+    visible_prompt_count: int = Field(default=10, ge=1, le=50)
 
 
 class PromptOut(BaseModel):
@@ -12,14 +13,22 @@ class PromptOut(BaseModel):
     target: str
 
 
-class SessionStartResponse(BaseModel):
+class SessionStateResponse(BaseModel):
     session_id: str
     started_at: datetime
-    prompts: list[PromptOut]
+    total_prompts: int
+    current_index: int
+    remaining_prompts: int
+    visible_prompt_count: int
+    active_prompts: list[PromptOut]
+    correct: int
+    attempted: int
+    accuracy: float
+    chars_per_minute: float
+    completed: bool
 
 
-class AnswerIn(BaseModel):
-    prompt_id: int = Field(ge=0)
+class SessionAnswerRequest(BaseModel):
     input_char: str = Field(min_length=1, max_length=1)
     response_time_ms: int = Field(ge=0)
 
@@ -29,14 +38,8 @@ class AnswerIn(BaseModel):
         return value.upper()
 
 
-class SessionSubmitRequest(BaseModel):
-    answers: list[AnswerIn] = Field(min_length=1)
-
-
-class SessionSummaryResponse(BaseModel):
-    session_id: str
-    total_prompts: int
-    answered_prompts: int
-    correct: int
-    accuracy: float
-    chars_per_minute: float
+class SessionAnswerResponse(BaseModel):
+    correct: bool
+    expected_char: str
+    received_char: str
+    state: SessionStateResponse

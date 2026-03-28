@@ -5,10 +5,10 @@ from uuid import uuid4
 
 from app.models.session import Session, SessionAnswer, SessionPrompt
 from app.schemas.session import (
-    AnswerIn,
+    SessionAnswerRequest,
+    SessionAnswerResponse,
     SessionStartRequest,
-    SessionStartResponse,
-    SessionSummaryResponse,
+    SessionStateResponse,
 )
 from app.utils.metrics import calculate_accuracy, calculate_chars_per_minute
 
@@ -16,20 +16,19 @@ from app.utils.metrics import calculate_accuracy, calculate_chars_per_minute
 class SessionService:
     def __init__(self) -> None:
         self._sessions: dict[str, Session] = {}
+        self._visible_prompt_count_by_session: dict[str, int] = {}
 
-    def create_session(self, payload: SessionStartRequest) -> SessionStartResponse:
+    def create_session(self, payload: SessionStartRequest) -> SessionStateResponse:
         session_id = str(uuid4())
         prompts = [
             SessionPrompt(id=index, target=char)
             for index, char in enumerate(choices(ascii_uppercase, k=payload.prompt_count))
         ]
+
         session = Session(id=session_id, prompts=prompts, started_at=datetime.now(timezone.utc))
         self._sessions[session_id] = session
-        return SessionStartResponse(
-            session_id=session.id,
-            started_at=session.started_at,
-            prompts=[{"id": prompt.id, "target": prompt.target} for prompt in prompts],
-        )
+        self._visible_prompt_count_by_session[session_id] = payload.visible_prompt_count
+        return self._build_state(session)
 
     def get_session(self, session_id: str) -> Session:
         session = self._sessions.get(session_id)
@@ -37,45 +36,83 @@ class SessionService:
             raise KeyError(f"Session {session_id} was not found")
         return session
 
-    def submit_answers(
+    def get_state(self, session_id: str) -> SessionStateResponse:
+        return self._build_state(self.get_session(session_id))
+
+    def submit_answer(
         self,
         session_id: str,
-        answers: list[AnswerIn],
-    ) -> SessionSummaryResponse:
+        payload: SessionAnswerRequest,
+    ) -> SessionAnswerResponse:
         session = self.get_session(session_id)
-        answer_models = [
-            SessionAnswer(
-                prompt_id=answer.prompt_id,
-                input_char=answer.input_char,
-                response_time_ms=answer.response_time_ms,
+
+        if self._is_completed(session):
+            state = self._build_state(session)
+            return SessionAnswerResponse(
+                correct=False,
+                expected_char="",
+                received_char=payload.input_char,
+                state=state,
             )
-            for answer in answers
-        ]
-        session.answers = answer_models
-        session.submitted_at = datetime.now(timezone.utc)
 
-        prompt_by_id = {prompt.id: prompt for prompt in session.prompts}
-        correct = 0
-        total_time_ms = 0
+        current_prompt = session.prompts[session.current_index]
+        is_correct = payload.input_char == current_prompt.target
 
-        for answer in answer_models:
-            prompt = prompt_by_id.get(answer.prompt_id)
-            if prompt and prompt.target == answer.input_char:
-                correct += 1
-            total_time_ms += answer.response_time_ms
-
-        answered = len(answer_models)
-        accuracy = calculate_accuracy(correct=correct, total=answered)
-        cpm = calculate_chars_per_minute(total_chars=answered, total_time_ms=total_time_ms)
-
-        return SessionSummaryResponse(
-            session_id=session.id,
-            total_prompts=len(session.prompts),
-            answered_prompts=answered,
-            correct=correct,
-            accuracy=accuracy,
-            chars_per_minute=cpm,
+        session.total_response_time_ms += payload.response_time_ms
+        session.answers.append(
+            SessionAnswer(
+                prompt_id=current_prompt.id,
+                input_char=payload.input_char,
+                response_time_ms=payload.response_time_ms,
+                is_correct=is_correct,
+            )
         )
+
+        if is_correct:
+            session.correct_count += 1
+            session.current_index += 1
+            if self._is_completed(session):
+                session.submitted_at = datetime.now(timezone.utc)
+
+        return SessionAnswerResponse(
+            correct=is_correct,
+            expected_char=current_prompt.target,
+            received_char=payload.input_char,
+            state=self._build_state(session),
+        )
+
+    def _build_state(self, session: Session) -> SessionStateResponse:
+        attempted = len(session.answers)
+        accuracy = calculate_accuracy(correct=session.correct_count, total=attempted)
+        chars_per_minute = calculate_chars_per_minute(
+            total_chars=session.correct_count,
+            total_time_ms=session.total_response_time_ms,
+        )
+        visible_prompt_count = self._visible_prompt_count_by_session[session.id]
+
+        return SessionStateResponse(
+            session_id=session.id,
+            started_at=session.started_at,
+            total_prompts=len(session.prompts),
+            current_index=session.current_index,
+            remaining_prompts=max(0, len(session.prompts) - session.current_index),
+            visible_prompt_count=visible_prompt_count,
+            active_prompts=self._active_prompts(session=session, visible_prompt_count=visible_prompt_count),
+            correct=session.correct_count,
+            attempted=attempted,
+            accuracy=accuracy,
+            chars_per_minute=chars_per_minute,
+            completed=self._is_completed(session),
+        )
+
+    def _active_prompts(self, session: Session, visible_prompt_count: int) -> list[SessionPrompt]:
+        start = session.current_index
+        end = start + visible_prompt_count
+        return session.prompts[start:end]
+
+    @staticmethod
+    def _is_completed(session: Session) -> bool:
+        return session.current_index >= len(session.prompts)
 
 
 session_service = SessionService()
