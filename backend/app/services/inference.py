@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import time
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -29,7 +30,7 @@ class ASLInferenceService:
             min_tracking_confidence=0.6,
         )
 
-    def predict_bgr_frame(self, frame: np.ndarray) -> InferenceOutput | None:
+    def predict_bgr_frame(self, frame: np.ndarray) -> Optional[InferenceOutput]:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         detections = self.detector.detect_video_frame(rgb_frame, int(time.monotonic() * 1000))
         if not detections:

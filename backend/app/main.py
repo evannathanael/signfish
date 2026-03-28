@@ -4,12 +4,17 @@ import base64
 import binascii
 import os
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional, Tuple
 
+import cv2
+import numpy as np
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+from app.models.loader import load_asl_bundle
+from app.services.inference import ASLInferenceService
 
 
 class InferRequest(BaseModel):
@@ -29,7 +34,7 @@ class ScoreInput(BaseModel):
     wpm: int
     accuracy: int
     consistency: int
-    date: str | None = None
+    date: Optional[str] = None
 
 
 class SettingsInput(BaseModel):
@@ -49,6 +54,8 @@ app.add_middleware(
 
 leaderboard_rows: list[dict[str, Any]] = []
 settings_state: dict[str, str] = {"difficulty": "normal"}
+_local_inference_service: Optional[ASLInferenceService] = None
+_local_service_load_failed = False
 
 
 def normalize_letter(value: str) -> str:
@@ -78,9 +85,45 @@ def normalize_frame(frame: str) -> str:
     return image_payload
 
 
+def get_local_inference_service() -> Optional[ASLInferenceService]:
+    global _local_inference_service, _local_service_load_failed
+    if _local_inference_service is not None:
+        return _local_inference_service
+    if _local_service_load_failed:
+        return None
+
+    try:
+        bundle = load_asl_bundle()
+        _local_inference_service = ASLInferenceService(bundle)
+    except Exception:
+        _local_service_load_failed = True
+        return None
+
+    return _local_inference_service
+
+
+def infer_local_model_letter(frame: str) -> Optional[Tuple[str, float]]:
+    service = get_local_inference_service()
+    if service is None:
+        return None
+
+    image_bytes = base64.b64decode(frame)
+    image_np = np.frombuffer(image_bytes, dtype=np.uint8)
+    bgr_frame = cv2.imdecode(image_np, cv2.IMREAD_COLOR)
+    if bgr_frame is None:
+        return None
+
+    prediction = service.predict_bgr_frame(bgr_frame)
+    if prediction is None:
+        return None
+
+    return prediction.top_label, float(prediction.top_confidence)
+
+
 def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
     endpoint = os.getenv("TINYFISH_MODEL_URL")
     timeout_seconds = float(os.getenv("TINYFISH_MODEL_TIMEOUT", "5"))
+    fallback_letter = normalize_letter(os.getenv("MODEL_FALLBACK_LETTER", "A")) or "A"
 
     if endpoint:
         try:
@@ -91,8 +134,8 @@ def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
             )
             response.raise_for_status()
             payload = response.json()
-        except requests.RequestException as exc:
-            raise HTTPException(status_code=502, detail=f"Model request failed: {exc}") from exc
+        except requests.RequestException:
+            payload = {}
 
         raw_prediction = (
             payload.get("predicted_letter")
@@ -103,13 +146,17 @@ def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
         )
         predicted_letter = normalize_letter(str(raw_prediction))
         if not predicted_letter:
-            raise HTTPException(status_code=502, detail="Model response missing valid letter")
+            local_prediction = infer_local_model_letter(frame)
+            if local_prediction is not None:
+                return local_prediction
+            return fallback_letter, 0.0
 
         confidence = float(payload.get("confidence", 1.0))
         return predicted_letter, confidence
 
-    # Local fallback keeps integration testable when model endpoint is offline.
-    fallback_letter = normalize_letter(os.getenv("MODEL_FALLBACK_LETTER", "A")) or "A"
+    local_prediction = infer_local_model_letter(frame)
+    if local_prediction is not None:
+        return local_prediction
     return fallback_letter, 0.5
 
 
