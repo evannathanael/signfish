@@ -1,3 +1,12 @@
 frontend/node_modules/
 backend/app/__pycache__/
 *.pyc
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.runtime/
+ml/data/external/
+ml/data/raw/
+ml/data/processed/
+backend/.runtime/
