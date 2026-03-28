@@ -4,7 +4,17 @@ import { useWebcam } from '../hooks/useWebcam';
 const LIVE_CAPTURE_INTERVAL_MS = 900;
 
 export default function Webcam({ onFrameCapture, disabled }) {
-  const { videoRef, captureFrame, error } = useWebcam();
+  const { videoRef, captureFrame, error, isReady } = useWebcam();
+
+  useEffect(() => {
+    if (disabled || !onFrameCapture || !isReady) return undefined;
+
+    const intervalId = setInterval(() => {
+      onFrameCapture(captureFrame());
+    }, 300);
+
+    return () => clearInterval(intervalId);
+  }, [captureFrame, disabled, isReady, onFrameCapture]);
 
   useEffect(() => {
     if (disabled || !onFrameCapture) return undefined;
@@ -23,7 +33,9 @@ export default function Webcam({ onFrameCapture, disabled }) {
       <p className="text-sm text-slate-300">
         {disabled
           ? 'Start a round to enable live sign recognition.'
-          : 'Live sign recognition is running. Hold each gesture briefly in frame.'}
+          : isReady
+          ? 'Live sign recognition is running. Hold each gesture briefly in frame.'
+          : 'Camera is connecting...'}
       </p>
       {error && <p className="text-sm text-red-400">{error}</p>}
     </div>

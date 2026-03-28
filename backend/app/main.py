@@ -4,7 +4,7 @@ import base64
 import binascii
 import os
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -29,7 +29,7 @@ class ScoreInput(BaseModel):
     wpm: int
     accuracy: int
     consistency: int
-    date: str | None = None
+    date: Optional[str] = None
 
 
 class SettingsInput(BaseModel):
