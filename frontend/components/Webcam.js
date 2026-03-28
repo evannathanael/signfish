@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useWebcam } from '../hooks/useWebcam';
 
+const LIVE_CAPTURE_INTERVAL_MS = 900;
+
 export default function Webcam({ onFrameCapture, disabled }) {
   const { videoRef, captureFrame, error, isReady } = useWebcam();
 
