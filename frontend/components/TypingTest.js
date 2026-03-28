@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Webcam from './Webcam';
 import StatsPanel from './StatsPanel';
 import { useTimer } from '../hooks/useTimer';
@@ -9,6 +9,9 @@ import {
   ROUND_TIME_SECONDS
 } from '../utils/constants';
 import { calculateAccuracy, calculateConsistency, calculateWpm } from '../utils/helpers';
+
+const MIN_INFERENCE_CONFIDENCE = 0.8;
+const MIN_SCORING_INTERVAL_MS = 1200;
 
 function pickPrompt(difficulty) {
   const list = PROMPTS_BY_DIFFICULTY[difficulty] || PROMPTS_BY_DIFFICULTY[DEFAULT_DIFFICULTY];
@@ -26,6 +29,8 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
   const [recentOutcomes, setRecentOutcomes] = useState([]);
   const [status, setStatus] = useState('Click start to begin your 30-second sign race.');
   const { timeLeft, isRunning, start, reset } = useTimer(ROUND_TIME_SECONDS);
+  const isInferencingRef = useRef(false);
+  const lastScoredAtRef = useRef(0);
 
   const promptLetters = currentPrompt.split('');
   const windowStart = Math.max(0, Math.min(currentLetterIndex, promptLetters.length - 10));
@@ -48,13 +53,29 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
     }
   }
 
-  async function handleFrameCapture(frameBase64) {
+  const handleFrameCapture = useCallback(async (frameBase64) => {
     if (!isRunning || !frameBase64) return;
+    if (isInferencingRef.current) return;
 
-    setAttempted((prev) => prev + 1);
+    isInferencingRef.current = true;
 
     try {
       const result = await inferSign(frameBase64, currentPrompt);
+      const confidence = Number(result?.confidence || 0);
+      const predictedLetter = String(result?.predicted_letter || '').trim();
+      const now = Date.now();
+
+      if (!predictedLetter || confidence < MIN_INFERENCE_CONFIDENCE) {
+        setStatus('No confident sign detected yet. Hold your gesture steady for a moment.');
+        return;
+      }
+
+      if (now - lastScoredAtRef.current < MIN_SCORING_INTERVAL_MS) {
+        return;
+      }
+      lastScoredAtRef.current = now;
+
+      setAttempted((prev) => prev + 1);
       const isCorrect = Boolean(result?.match);
       if (isCorrect) {
         setCorrect((prev) => prev + 1);
@@ -81,34 +102,11 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
         setStatus(isCorrect ? 'Correct letter! Move to the next one.' : 'Wrong letter. Try the next letter.');
       }
     } catch {
-      setStatus('Inference service unavailable. Showing offline behavior.');
-      const offlineCorrect = Math.random() > 0.3;
-      if (offlineCorrect) {
-        setCorrect((prev) => prev + 1);
-      }
-      setRecentOutcomes((prev) => [...prev.slice(-19), offlineCorrect ? 100 : 0]);
-
-      setLetterStatuses((prevStatuses) => {
-        const updated = [...prevStatuses];
-        if (currentLetterIndex < updated.length) {
-          updated[currentLetterIndex] = offlineCorrect ? 'correct' : 'wrong';
-        }
-        return updated;
-      });
-
-      const nextLetter = currentLetterIndex + 1;
-      if (nextLetter >= promptLetters.length) {
-        const nextPrompt = pickPrompt(difficulty);
-        setCurrentPrompt(nextPrompt);
-        setLetterStatuses(nextPrompt.split('').map(() => 'pending'));
-        setCurrentLetterIndex(0);
-        setStatus(offlineCorrect ? 'Offline correct. New sign loaded.' : 'Offline wrong. New sign loaded.');
-      } else {
-        setCurrentLetterIndex(nextLetter);
-        setStatus(offlineCorrect ? 'Offline correct. Move to next letter.' : 'Offline wrong. Try the next letter.');
-      }
+      setStatus('Inference service unavailable. Waiting for model connection...');
+    } finally {
+      isInferencingRef.current = false;
     }
-  }
+  }, [currentLetterIndex, currentPrompt, difficulty, isRunning, promptLetters.length]);
 
   function handleStart() {
     if (isRunning) return;
@@ -121,6 +119,7 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
     setCurrentPrompt(newPrompt);
     setLetterStatuses(newPrompt.split('').map(() => 'pending'));
     setCurrentLetterIndex(0);
+    lastScoredAtRef.current = 0;
     setStatus('Round started. Show the sign in front of your webcam.');
     start(finishRound);
   }

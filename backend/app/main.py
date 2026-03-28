@@ -4,7 +4,7 @@ import base64
 import binascii
 import os
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -29,7 +29,7 @@ class ScoreInput(BaseModel):
     wpm: int
     accuracy: int
     consistency: int
-    date: str | None = None
+    date: Optional[str] = None
 
 
 class SettingsInput(BaseModel):
@@ -81,6 +81,7 @@ def normalize_frame(frame: str) -> str:
 def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
     endpoint = os.getenv("TINYFISH_MODEL_URL")
     timeout_seconds = float(os.getenv("TINYFISH_MODEL_TIMEOUT", "5"))
+    fallback_letter = normalize_letter(os.getenv("MODEL_FALLBACK_LETTER", "A")) or "A"
 
     if endpoint:
         try:
@@ -91,8 +92,10 @@ def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
             )
             response.raise_for_status()
             payload = response.json()
-        except requests.RequestException as exc:
-            raise HTTPException(status_code=502, detail=f"Model request failed: {exc}") from exc
+        except requests.RequestException:
+            # If remote model is unavailable, gracefully degrade to fallback output
+            # so frontend rounds continue instead of failing each capture.
+            return fallback_letter, 0.0
 
         raw_prediction = (
             payload.get("predicted_letter")
@@ -103,13 +106,12 @@ def infer_model_letter(frame: str, question: str) -> tuple[str, float]:
         )
         predicted_letter = normalize_letter(str(raw_prediction))
         if not predicted_letter:
-            raise HTTPException(status_code=502, detail="Model response missing valid letter")
+            return fallback_letter, 0.0
 
         confidence = float(payload.get("confidence", 1.0))
         return predicted_letter, confidence
 
     # Local fallback keeps integration testable when model endpoint is offline.
-    fallback_letter = normalize_letter(os.getenv("MODEL_FALLBACK_LETTER", "A")) or "A"
     return fallback_letter, 0.5
 
 

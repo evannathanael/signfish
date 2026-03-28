@@ -21,7 +21,7 @@ export async function inferSign(frameBase64, expectedSign) {
   const response = await fetch(TINYFISH_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ frame: frameBase64, expectedSign })
+    body: JSON.stringify({ frame: frameBase64, question: expectedSign })
   });
 
   if (!response.ok) {
