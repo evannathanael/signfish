@@ -1,0 +1,3 @@
+from .config import DYNAMIC_ASL_LABELS, STATIC_ASL_LABELS
+
+__all__ = ["STATIC_ASL_LABELS", "DYNAMIC_ASL_LABELS"]
