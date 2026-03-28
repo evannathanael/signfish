@@ -1,23 +1,29 @@
 {
-  "best_epoch": 2,
-  "dataset_root": "/Users/eron/.cache/kagglehub/datasets/ayuraj/asl-dataset/versions/1/asl_dataset/asl_dataset",
-  "validation_loss": 2.6242239475250244,
-  "validation_accuracy": 0.55,
-  "validation_macro_f1": 0.43669467787114846,
+  "best_epoch": 21,
+  "dataset_root": "/Users/eron/.cache/kagglehub/datasets/ayuraj/asl-dataset/versions/1/asl_dataset;/Users/eron/.cache/kagglehub/datasets/ayuraj/american-sign-language-dataset/versions/1/asl",
+  "validation_loss": 0.00422531852259107,
+  "validation_accuracy": 0.9991082928762509,
+  "validation_macro_f1": 0.9979264830981048,
   "class_names": [
     "A",
     "B",
     "C",
     "D",
+    "E",
     "F",
     "G",
     "H",
     "I",
     "K",
     "L",
+    "M",
+    "N",
     "O",
     "P",
+    "Q",
     "R",
+    "S",
+    "T",
     "U",
     "V",
     "W",
@@ -25,147 +31,195 @@
     "Y"
   ],
   "samples_per_class": {
-    "A": 2,
-    "B": 20,
-    "C": 20,
-    "D": 20,
-    "F": 20,
-    "G": 10,
-    "H": 6,
-    "I": 16,
-    "K": 20,
-    "L": 18,
-    "O": 2,
-    "P": 10,
-    "R": 20,
-    "U": 20,
-    "V": 18,
-    "W": 10,
-    "X": 20,
-    "Y": 10
+    "A": 1398,
+    "B": 4416,
+    "C": 1992,
+    "D": 4398,
+    "E": 1524,
+    "F": 4518,
+    "G": 3528,
+    "H": 3078,
+    "I": 3450,
+    "K": 4566,
+    "L": 4596,
+    "M": 384,
+    "N": 978,
+    "O": 1602,
+    "P": 3414,
+    "Q": 786,
+    "R": 3534,
+    "S": 786,
+    "T": 402,
+    "U": 4164,
+    "V": 4128,
+    "W": 3576,
+    "X": 3276,
+    "Y": 2790
   },
-  "skipped_files_count": 109,
+  "source_counts": {
+    "/Users/eron/.cache/kagglehub/datasets/ayuraj/asl-dataset/versions/1/asl_dataset": 933,
+    "/Users/eron/.cache/kagglehub/datasets/ayuraj/asl-dataset/versions/1/asl_dataset/asl_dataset": 933,
+    "/Users/eron/.cache/kagglehub/datasets/ayuraj/american-sign-language-dataset/versions/1/asl": 10281,
+    "/Users/eron/.cache/kagglehub/datasets/ayuraj/american-sign-language-dataset/versions/1/asl/asl": 10281
+  },
+  "skipped_files_count": 14422,
   "classification_report": {
     "A": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 0.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 210.0
     },
     "B": {
       "precision": 1.0,
-      "recall": 0.6666666666666666,
-      "f1-score": 0.8,
-      "support": 3.0
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 662.0
     },
     "C": {
-      "precision": 0.75,
-      "recall": 1.0,
-      "f1-score": 0.8571428571428571,
-      "support": 3.0
+      "precision": 0.9933333333333333,
+      "recall": 0.9966555183946488,
+      "f1-score": 0.994991652754591,
+      "support": 299.0
     },
     "D": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 3.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 660.0
+    },
+    "E": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 229.0
     },
     "F": {
       "precision": 1.0,
-      "recall": 0.6666666666666666,
-      "f1-score": 0.8,
-      "support": 3.0
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 678.0
     },
     "G": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 529.0
     },
     "H": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 1.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 462.0
     },
     "I": {
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 2.0
+      "support": 518.0
     },
     "K": {
-      "precision": 0.5,
-      "recall": 0.3333333333333333,
-      "f1-score": 0.4,
-      "support": 3.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 685.0
     },
     "L": {
-      "precision": 0.6,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1-score": 0.75,
-      "support": 3.0
+      "f1-score": 1.0,
+      "support": 689.0
+    },
+    "M": {
+      "precision": 0.9666666666666667,
+      "recall": 1.0,
+      "f1-score": 0.9830508474576272,
+      "support": 58.0
+    },
+    "N": {
+      "precision": 1.0,
+      "recall": 0.9863945578231292,
+      "f1-score": 0.9931506849315068,
+      "support": 147.0
     },
     "O": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 0.0
+      "precision": 0.99581589958159,
+      "recall": 0.9916666666666667,
+      "f1-score": 0.9937369519832986,
+      "support": 240.0
     },
     "P": {
       "precision": 1.0,
       "recall": 1.0,
       "f1-score": 1.0,
-      "support": 2.0
+      "support": 512.0
+    },
+    "Q": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 118.0
     },
     "R": {
-      "precision": 0.25,
+      "precision": 1.0,
+      "recall": 0.9943396226415094,
+      "f1-score": 0.9971617786187322,
+      "support": 530.0
+    },
+    "S": {
+      "precision": 1.0,
       "recall": 1.0,
-      "f1-score": 0.4,
-      "support": 3.0
+      "f1-score": 1.0,
+      "support": 118.0
+    },
+    "T": {
+      "precision": 0.9836065573770492,
+      "recall": 1.0,
+      "f1-score": 0.9917355371900827,
+      "support": 60.0
     },
     "U": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 3.0
+      "precision": 0.9952229299363057,
+      "recall": 1.0,
+      "f1-score": 0.9976057462090981,
+      "support": 625.0
     },
     "V": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 3.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 619.0
     },
     "W": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 1.0
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 536.0
     },
     "X": {
-      "precision": 0.6,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1-score": 0.75,
-      "support": 3.0
+      "f1-score": 1.0,
+      "support": 491.0
     },
     "Y": {
       "precision": 1.0,
-      "recall": 0.5,
-      "f1-score": 0.6666666666666666,
-      "support": 2.0
+      "recall": 0.9976076555023924,
+      "f1-score": 0.9988023952095808,
+      "support": 418.0
     },
-    "accuracy": 0.55,
+    "accuracy": 0.9991082928762509,
     "macro avg": {
-      "precision": 0.42777777777777776,
-      "recall": 0.45370370370370366,
-      "f1-score": 0.4124338624338625,
-      "support": 40.0
+      "precision": 0.9972768911206228,
+      "recall": 0.9986110008761812,
+      "f1-score": 0.9979264830981048,
+      "support": 10093.0
     },
     "weighted avg": {
-      "precision": 0.5025000000000001,
-      "recall": 0.55,
-      "f1-score": 0.4901190476190476,
-      "support": 40.0
+      "precision": 0.9991181882379598,
+      "recall": 0.9991082928762509,
+      "f1-score": 0.9991095155022999,
+      "support": 10093.0
     }
   }
 }
