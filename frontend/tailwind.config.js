@@ -3,15 +3,19 @@ module.exports = {
   content: [
     './pages/**/*.{js,jsx}',
     './components/**/*.{js,jsx}',
-    './hooks/**/*.{js,jsx}'
+    './hooks/**/*.{js,jsx}',
+    './services/**/*.{js,jsx}',
+    './styles/**/*.css'
   ],
   theme: {
     extend: {
       colors: {
         ink: '#0f172a',
-        slate: '#1e293b',
         neon: '#22d3ee',
         mint: '#34d399'
+      },
+      fontFamily: {
+        gallaudet: ['Gallaudet', 'ui-sans-serif', 'system-ui', 'sans-serif']
       }
     }
   },

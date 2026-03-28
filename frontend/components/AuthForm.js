@@ -36,6 +36,18 @@ export default function AuthForm({ mode = 'login' }) {
     }
   }
 
+  async function handleSocialLogin(loginMethod) {
+    setError('');
+    setLoading(true);
+    try {
+      await loginMethod();
+    } catch (err) {
+      setError(err.message || 'Social sign-in failed.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="panel max-w-md">
       <h2 className="mb-4 text-xl font-bold capitalize">{mode}</h2>
@@ -66,16 +78,18 @@ export default function AuthForm({ mode = 'login' }) {
         <button
           type="button"
           className="rounded-md bg-slate-700 px-3 py-2 text-sm"
-          onClick={loginWithGoogle}
+          onClick={() => handleSocialLogin(loginWithGoogle)}
+          disabled={loading}
         >
-          Continue with Google
+          {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
         <button
           type="button"
           className="rounded-md bg-slate-700 px-3 py-2 text-sm"
-          onClick={loginWithGithub}
+          onClick={() => handleSocialLogin(loginWithGithub)}
+          disabled={loading}
         >
-          Continue with GitHub
+          {loading ? 'Signing in...' : 'Continue with GitHub'}
         </button>
       </div>
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}

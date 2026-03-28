@@ -1,11 +1,10 @@
 import Link from 'next/link';
 
 const nav = [
-  { href: '/', label: 'Race' },
+  { href: '/', label: 'Dashboard' },
   { href: '/leaderboard', label: 'Leaderboard' },
   { href: '/settings', label: 'Settings' },
-  { href: '/login', label: 'Login' },
-  { href: '/register', label: 'Register' }
+  { href: '/login', label: 'Login' }
 ];
 
 export default function Layout({ children }) {

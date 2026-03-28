@@ -16,12 +16,19 @@ function pickPrompt(difficulty) {
 }
 
 export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
-  const [currentPrompt, setCurrentPrompt] = useState(() => pickPrompt(difficulty));
+  const initialPrompt = pickPrompt(difficulty);
+  const [currentPrompt, setCurrentPrompt] = useState(initialPrompt);
+  const [letterStatuses, setLetterStatuses] = useState(initialPrompt.split('').map(() => 'pending'));
+  const [currentLetterIndex, setCurrentLetterIndex] = useState(0);
   const [attempted, setAttempted] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [recentOutcomes, setRecentOutcomes] = useState([]);
   const [status, setStatus] = useState('Click start to begin your 30-second sign race.');
   const { timeLeft, isRunning, start, stop, reset } = useTimer(ROUND_TIME_SECONDS);
+
+  const promptLetters = currentPrompt.split('');
+  const windowStart = Math.max(0, Math.min(currentLetterIndex, promptLetters.length - 10));
+  const visibleLetters = promptLetters.slice(windowStart, windowStart + 10);
 
   const wpm = useMemo(
     () => calculateWpm(correct, ROUND_TIME_SECONDS - timeLeft),
@@ -52,8 +59,26 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
         setCorrect((prev) => prev + 1);
       }
       setRecentOutcomes((prev) => [...prev.slice(-19), isCorrect ? 100 : 0]);
-      setCurrentPrompt(pickPrompt(difficulty));
-      setStatus(isCorrect ? 'Correct sign recognized!' : 'Not quite. Try the next sign.');
+
+      setLetterStatuses((prevStatuses) => {
+        const updated = [...prevStatuses];
+        if (currentLetterIndex < updated.length) {
+          updated[currentLetterIndex] = isCorrect ? 'correct' : 'wrong';
+        }
+        return updated;
+      });
+
+      const nextLetter = currentLetterIndex + 1;
+      if (nextLetter >= promptLetters.length) {
+        const nextPrompt = pickPrompt(difficulty);
+        setCurrentPrompt(nextPrompt);
+        setLetterStatuses(nextPrompt.split('').map(() => 'pending'));
+        setCurrentLetterIndex(0);
+        setStatus(isCorrect ? 'Correct letter! New sign loaded.' : 'Wrong letter. New sign loaded.');
+      } else {
+        setCurrentLetterIndex(nextLetter);
+        setStatus(isCorrect ? 'Correct letter! Move to the next one.' : 'Wrong letter. Try the next letter.');
+      }
     } catch {
       setStatus('Inference service unavailable. Showing offline behavior.');
       const offlineCorrect = Math.random() > 0.3;
@@ -61,16 +86,38 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
         setCorrect((prev) => prev + 1);
       }
       setRecentOutcomes((prev) => [...prev.slice(-19), offlineCorrect ? 100 : 0]);
-      setCurrentPrompt(pickPrompt(difficulty));
+
+      setLetterStatuses((prevStatuses) => {
+        const updated = [...prevStatuses];
+        if (currentLetterIndex < updated.length) {
+          updated[currentLetterIndex] = offlineCorrect ? 'correct' : 'wrong';
+        }
+        return updated;
+      });
+
+      const nextLetter = currentLetterIndex + 1;
+      if (nextLetter >= promptLetters.length) {
+        const nextPrompt = pickPrompt(difficulty);
+        setCurrentPrompt(nextPrompt);
+        setLetterStatuses(nextPrompt.split('').map(() => 'pending'));
+        setCurrentLetterIndex(0);
+        setStatus(offlineCorrect ? 'Offline correct. New sign loaded.' : 'Offline wrong. New sign loaded.');
+      } else {
+        setCurrentLetterIndex(nextLetter);
+        setStatus(offlineCorrect ? 'Offline correct. Move to next letter.' : 'Offline wrong. Try the next letter.');
+      }
     }
   }
 
   function handleStart() {
+    const newPrompt = pickPrompt(difficulty);
     reset();
     setAttempted(0);
     setCorrect(0);
     setRecentOutcomes([]);
-    setCurrentPrompt(pickPrompt(difficulty));
+    setCurrentPrompt(newPrompt);
+    setLetterStatuses(newPrompt.split('').map(() => 'pending'));
+    setCurrentLetterIndex(0);
     setStatus('Round started. Show the sign in front of your webcam.');
     start(finishRound);
   }
@@ -90,7 +137,31 @@ export default function TypingTest({ difficulty = DEFAULT_DIFFICULTY }) {
             </button>
           </div>
           <p className="mb-2 text-sm text-slate-300">Difficulty: <span className="capitalize">{difficulty}</span></p>
-          <p className="mb-4 text-lg">Current target sign: <span className="font-bold text-neon">{currentPrompt}</span></p>
+          <div className="mb-4">
+            <p className="mb-3 text-lg">Current target sign letters:</p>
+            <div className="flex flex-wrap items-center gap-2 text-4xl font-black">
+              {visibleLetters.map((letter, idx) => {
+                const letterIndex = windowStart + idx;
+                const statusClass =
+                  letterStatuses[letterIndex] === 'correct'
+                    ? 'text-emerald-400'
+                    : letterStatuses[letterIndex] === 'wrong'
+                    ? 'text-rose-400'
+                    : 'text-slate-100';
+                return (
+                  <span
+                    key={`${letter}-${letterIndex}`}
+                    className={`${statusClass} inline-block mr-4`}
+                  >
+                    {letter}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-sm text-slate-400">
+              Showing {Math.min(10, promptLetters.length)} of {promptLetters.length} letters.
+            </p>
+          </div>
           <p className="text-sm text-slate-300">{status}</p>
         </div>
         <Webcam onFrameCapture={handleFrameCapture} disabled={!isRunning} />

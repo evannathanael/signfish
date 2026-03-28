@@ -1,5 +1,12 @@
-import AuthForm from '../components/AuthForm';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function RegisterPage() {
-  return <AuthForm mode="register" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/login?mode=register');
+  }, [router]);
+
+  return null;
 }
